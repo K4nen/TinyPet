@@ -1,0 +1,12 @@
+indexes:
+- kind: Petition
+  properties:
+    - name: Owner
+    - name: Date
+      direction: desc
+- kind: Petition
+  properties:
+    - name: votants
+    - name: Date
+      direction: desc         
+    

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tinypet 2023</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+
+
+    <script src="https://unpkg.com/mithril/mithril.js"></script>
+    <script src="https://unpkg.com/jwt-decode/build/jwt-decode.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #8b8b8b;
+            color: #22242e;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 110px;
+            background-color: #c3332b;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 32px;
+            color: #22242e;
+            font-weight: bold;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            margin: 0px;
+            max-width: 100%;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+            background-color: #22242e;
+            width: 200px;
+        }
+
+        .menu button {
+            margin: 25px;
+            padding: 15px;
+            border: none;
+            background-color: #c3332b;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 150px;
+            color: #f2e0c2;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .menu button:hover {
+            background-color: #c3332b;
+            color: #ead3ad;
+        }
+
+        .container button {
+            margin: 25px;
+            padding: 15px;
+            border: none;
+            background-color: #c3332b;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            color: #f2e0c2;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .container button:hover {
+            background-color: #c3332b;
+            color: #ead3ad;
+        }
+
+        .container.tile.is-vertical button {
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            background-color: #c3332b;
+            cursor: pointer;
+            font-weight: bold;
+            width: 150px;
+            border-radius: 5px;
+            color: #f2e0c2;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .container.tile.is-vertical button:hover {
+            background-color: #c3332b;
+            color: #ead3ad;
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f2e0c2;
+        }
+
+        .google-signin {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .google-signin button {
+            background-color: #ffcb05;
+            border: none;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            font-weight: bold;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            color: #f2e0c2;
+        }
+
+        .google-signin button:hover {
+            background-color: #ffcb05;
+            color: #f2e0c2;
+        }
+        *, *:before, *:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+body {
+  background: #f2e0c2;
+}
+.center-on-page {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+}
+/* Poké Styles */
+.pokeball {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  background: #fff;
+  border: 5px solid #000;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: inset -10px 10px 0 10px #ccc;
+  animation: fall .25s ease-in-out,
+             shake 1.25s cubic-bezier(.36,.07,.19,.97) 3;
+}
+.pokeball::before,
+.pokeball::after {
+  content:"";
+  position: absolute;
+}
+.pokeball::before {
+  background: #c2332b;
+  width: 100%;
+  height: 50%;
+}
+.pokeball::after {
+  top: calc(50% - 5px);
+  width: 100%;
+  height: 10px;
+  background: #000;
+}
+.pokeball__button {
+  position: absolute;
+  top: calc(50% - 15px);
+  left: calc(50% - 15px);
+  width: 30px;
+  height: 30px;
+  background: #7f8c8d;
+  border: 10px solid #fff;
+  border-radius: 50%;
+  z-index: 10;
+  box-shadow: 0 0 0 5px black;
+  animation: blink .5s alternate 7;
+}
+    </style>
+</head>
+
+<body>
+    <script>
+        var Petition = {
+            list: [],
+            loadList: function () {
+                return m.request({
+                    method: "GET",
+                    url: "_ah/api/myApi/v1/gotMyPetitions?access_token=" + Login.ID
+                })
+                    .then(function (result) {
+                        Petition.list = result.items
+                        if ('nextPageToken' in result) {
+                            Petition.nextToken = result.nextPageToken
+                        } else {
+                            Petition.nextToken = ""
+                        }
+                    })
+            },
+            next: function () {
+
+                return m.request({
+                    method: "GET",
+                    url: "_ah/api/myApi/v1/gotMyPetitions?access_token=" + Login.ID + "&next=" + Petition.nextToken
+                })
+                    .then(function (result) {
+                        result.items.map(function (item) { Petition.list.push(item) })
+                        if ('nextPageToken' in result) {
+                            Petition.nextToken = result.nextPageToken
+                        } else {
+                            Petition.nextToken = ""
+                        }
+                    })
+            }
+        }
+
+        var PetitionView = {
+            view: function () {
+                return m('div', [
+                    m('div', { class: 'subtitle' }, "Liste des pétitions"),
+                    m('table', { class: 'table is-striped' }, [
+                        m('tr', [
+                            m('th', { width: "100px" }, "Titre"),
+                            m('th', { width: "100px" }, "Propriétaire"),
+                            m('th', { width: "750px" }, "Texte"),
+                            m('th', { width: "250px" }, "Nombre de votants"),
+                            m('th', { width: "250px" }, "Date"),
+
+                        ]),
+                        Petition.list.map(function (item) {
+                            return m("tr", [
+                                m('td', m('label', item.properties.Title)),
+                                m('td', m('label', item.properties.Owner)),
+                                m('td', m('label', item.properties.Body)),
+                                m('td', m('label', item.properties.nbvotants)),
+                                m('td', m('label', item.properties.Date)),
+                            ])
+                        })
+                    ])
+                ])
+            }
+        }
+
+        var Login = {
+            ID: "",
+            Full_Name: "",
+            Given_Name: "",
+            Family_Name: "",
+            Image_URL: "",
+            Email: "",
+            update: function (response) {
+                var responsePayload = jwt_decode(response.credential);
+                Login.ID = response.credential;
+                Login.Sub = responsePayload.Sub;
+                Login.Full_Name = responsePayload.name;
+                Login.Given_Name = responsePayload.given_name;
+                Login.Family_Name = responsePayload.family_name;
+                Login.Image_URL = responsePayload.picture;
+                Login.Email = responsePayload.email;
+                Petition.loadList();
+                document.getElementById("LoginViewID").setAttribute("style", "display:none")
+                m.redraw()
+            }
+
+        }
+
+        var LoginView = {
+            view: function () {
+                return m('div', [
+                    m('div', { class: 'subtitle' }, "Connectez-vous afin d'afficher vos pétitions", [
+                        m('div', {
+                            id: "g_id_onload",
+                            "data-client_id": "629395974706-tfmev15r300qgu9mu3tntvle3lusu71r.apps.googleusercontent.com",
+                            "data-callback": "handleCredentialResponse"
+                        }),
+                        m('div', { class: "g_id_signin", "data-type": "standard" })
+                    ])
+                ])
+            }
+        }
+
+        var handleCredentialResponse = function (response) {
+            // decodeJwtResponse() is a custom function defined by you
+            // to decode the credential response.
+            const responsePayload = jwt_decode(response.credential);
+            Login.update(response);
+        }
+
+        var App = {
+            view: function () {
+                return m("div", [
+                    m(".header",
+                    m("div", {class: 'pokeball'}, m('div', {class: 'pokeball__button'})),   
+                    m('span',{ style: {color: '#c2332b'}},'_'),                     
+                    [m('h1',
+                    m('span',{ style: {fontWeight:'B', font:'1.2em'}},'Tiny '),
+                    m('span',{ style: {fontWeight:'B',font:'1.2em'}},'Pet'))
+                    ]),
+                    m(".container", [
+                        m(".menu", [
+                            m("button", { onclick: function () { window.location.href = '../'; } }, "Accueil"),
+                            m("button", { onclick: creationPetition }, "Créer une pétition"),
+                            m("button", { onclick: createdPetitions }, "Voir mes pétitions créées"),
+                            m("button", { onclick: signedPetitions }, "Voir mes pétitions signées")
+                        ]),
+                        m(".container.tile.is-vertical", [
+                            m("div", { class: 'tile', id: "LoginViewID", style: "max-height: 100px; background:white;" }, m('div', { class: 'tile is-child box' }, m(LoginView))),
+                            m("div", { class: 'tile', id: "PetitionViewID", style: "background:white; display:block" }, m('div', { class: 'tile is-child box' }, m(PetitionView))),
+                            m("div", { class: 'tile', id: "NextViewID", style: "background:white; max-height:67px" }, m('button', { onclick: function (e) { Petition.next() } }, "Suivant")),
+                        ]),
+                    ]),
+                ]);
+            }
+        };
+
+
+        function creationPetition() {
+            window.location.href = '/PetitionCreation.html';
+        }
+
+        function createdPetitions() {
+            window.location.href = '/PetitionCree.html';
+        }
+
+        function signedPetitions() {
+            window.location.href = '/PetitionSignee.html';
+        }
+
+
+        m.mount(document.body, App);
+    </script>
+</body>
+
+</html>
