@@ -1,5 +1,5 @@
 # TinyPet
-BARILLET Tom & MENADIER Mélodie     M1 MIAGE ALT
+BARILLET Tom & MENADIER Mélodie     M1 MIAGE ALT  
 <br/>
 <b>Lien vers le site : </b> https://projetappcloudbarillet.ew.r.appspot.com/  
 <br/>
